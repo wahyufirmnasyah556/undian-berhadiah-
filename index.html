@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#080b16">
+<title>LUCKORA — Lucky Draw</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+:root{
+  --bg:#070914;
+  --card:rgba(255,255,255,.055);
+  --border:rgba(255,255,255,.09);
+  --muted:#8992ae;
+  --blue:#5865ff;
+  --cyan:#00d9ff;
+}
+
+body{
+  min-height:100vh;
+  color:white;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(85,88,255,.22),transparent 28%),
+    radial-gradient(circle at 90% 10%,rgba(0,218,255,.13),transparent 25%),
+    linear-gradient(145deg,#050711,#090d1d 55%,#050711);
+  overflow-x:hidden;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.25;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:45px 45px;
+}
+
+.container{
+  width:min(1150px,92%);
+  margin:auto;
+}
+
+/* NAV */
+
+nav{
+  height:78px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:relative;
+  z-index:5;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+
+.brandIcon{
+  width:43px;
+  height:43px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:linear-gradient(135deg,#5d5cff,#00d8ff);
+  box-shadow:0 0 35px rgba(74,110,255,.35);
+}
+
+.brand small{
+  display:block;
+  color:#747e9c;
+  font-size:9px;
+  letter-spacing:1.5px;
+  margin-top:2px;
+}
+
+.navRight{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.live{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 13px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  color:#aeb7d2;
+  font-size:11px;
+}
+
+.liveDot{
+  width:7px;
+  height:7px;
+  background:#28e59c;
+  border-radius:50%;
+  box-shadow:0 0 12px #28e59c;
+}
+
+/* HERO */
+
+.hero{
+  text-align:center;
+  padding:48px 0 30px;
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 13px;
+  border:1px solid rgba(105,120,255,.2);
+  background:rgba(82,93,255,.08);
+  border-radius:999px;
+  color:#9ca8ff;
+  font-size:11px;
+  margin-bottom:20px;
+}
+
+.hero h1{
+  font-size:clamp(42px,8vw,76px);
+  line-height:.95;
+  letter-spacing:-4px;
+  background:linear-gradient(90deg,#fff 20%,#a6b0ff 50%,#53e7ff 90%);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.hero p{
+  max-width:620px;
+  margin:20px auto 0;
+  color:#8992ae;
+  line-height:1.7;
+  font-size:14px;
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin:20px 0 25px;
+}
+
+.stat{
+  padding:18px;
+  border-radius:19px;
+  border:1px solid var(--border);
+  background:var(--card);
+  backdrop-filter:blur(15px);
+}
+
+.stat strong{
+  display:block;
+  font-size:21px;
+}
+
+.stat span{
+  color:#747e9c;
+  font-size:10px;
+}
+
+/* MAIN */
+
+.grid{
+  display:grid;
+  grid-template-columns:1.08fr .92fr;
+  gap:20px;
+}
+
+.card{
+  border:1px solid var(--border);
+  background:var(--card);
+  backdrop-filter:blur(22px);
+  border-radius:27px;
+  padding:24px;
+  box-shadow:0 25px 80px rgba(0,0,0,.22);
+}
+
+.title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.title h2{
+  font-size:17px;
+}
+
+.title span{
+  color:#6f7896;
+  font-size:10px;
+}
+
+/* WHEEL */
+
+.wheelBox{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.wheelContainer{
+  width:min(390px,78vw);
+  aspect-ratio:1;
+  position:relative;
+  margin:4px auto 22px;
+}
+
+.wheelGlow{
+  position:absolute;
+  inset:-18px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(77,101,255,.25),transparent 65%);
+  filter:blur(15px);
+}
+
+.pointer{
+  position:absolute;
+  top:-15px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+  width:0;
+  height:0;
+  border-left:16px solid transparent;
+  border-right:16px solid transparent;
+  border-top:36px solid white;
+  filter:drop-shadow(0 4px 8px #000);
+}
+
+.wheel{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  border:11px solid #181d32;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.08),
+    0 20px 70px rgba(0,0,0,.45);
+  overflow:hidden;
+  transition:transform 5s cubic-bezier(.08,.75,.12,1);
+
+  background:
+  conic-gradient(
+    #5b5cf5 0deg 45deg,
+    #ee4779 45deg 90deg,
+    #08cde7 90deg 135deg,
+    #7c4dff 135deg 180deg,
+    #f5a623 180deg 225deg,
+    #12c997 225deg 270deg,
+    #ef5260 270deg 315deg,
+    #377dff 315deg 360deg
+  );
+}
+
+.wheel:before{
+  content:"";
+  position:absolute;
+  inset:42%;
+  border-radius:50%;
+  background:linear-gradient(145deg,#fff,#b9c1d8);
+  box-shadow:
+    0 0 0 7px #15192b,
+    0 0 25px rgba(255,255,255,.5);
+  z-index:5;
+}
+
+.labels{
+  position:absolute;
+  inset:0;
+  z-index:3;
+}
+
+.labels div{
+  position:absolute;
+  width:100px;
+  left:50%;
+  top:50%;
+  transform-origin:0 0;
+  text-align:center;
+  font-weight:900;
+  font-size:10px;
+  text-shadow:0 2px 5px #000;
+}
+
+.labels div:nth-child(1){transform:rotate(22.5deg) translate(75px)}
+.labels div:nth-child(2){transform:rotate(67.5deg) translate(75px)}
+.labels div:nth-child(3){transform:rotate(112.5deg) translate(75px)}
+.labels div:nth-child(4){transform:rotate(157.5deg) translate(75px)}
+.labels div:nth-child(5){transform:rotate(202.5deg) translate(75px)}
+.labels div:nth-child(6){transform:rotate(247.5deg) translate(75px)}
+.labels div:nth-child(7){transform:rotate(292.5deg) translate(75px)}
+.labels div:nth-child(8){transform:rotate(337.5deg) translate(75px)}
+
+.spin{
+  width:min(350px,100%);
+  padding:16px;
+  border:0;
+  border-radius:17px;
+  color:#fff;
+  font-size:14px;
+  font-weight:900;
+  cursor:pointer;
+  background:linear-gradient(100deg,#5a57ff,#00cfe9);
+  box-shadow:0 14px 40px rgba(66,105,255,.3);
+  transition:.2s;
+}
+
+.spin:hover{
+  transform:translateY(-2px);
+}
+
+.spin:disabled{
+  opacity:.5;
+}
+
+/* COUNTDOWN */
+
+.countdown{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin:20px 0 5px;
+}
+
+.cd{
+  width:65px;
+  padding:10px 4px;
+  text-align:center;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--border);
+  border-radius:13px;
+}
+
+.cd strong{
+  display:block;
+  font-size:18px;
+}
+
+.cd span{
+  color:#6e7895;
+  font-size:8px;
+}
+
+/* PRIZES */
+
+.prizes{
+  display:grid;
+  gap:9px;
+}
+
+.prize{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.035);
+  border-radius:16px;
+}
+
+.prizeIcon{
+  width:45px;
+  height:45px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:rgba(255,255,255,.07);
+  font-size:22px;
+}
+
+.prizeInfo{
+  flex:1;
+}
+
+.prizeInfo b{
+  display:block;
+  font-size:12px;
+}
+
+.prizeInfo small{
+  color:#737d99;
+  font-size:9px;
+}
+
+.value{
+  font-weight:800;
+  font-size:10px;
+  color:#69dcff;
+}
+
+/* WINNERS */
+
+.winners{
+  margin-top:20px;
+}
+
+.winnerItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-radius:13px;
+  background:rgba(255,255,255,.035);
+  margin-bottom:7px;
+  font-size:10px;
+}
+
+.avatar{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:linear-gradient(135deg,#6366f1,#00c9e9);
+  font-weight:900;
+  font-size:10px;
+}
+
+.winnerItem span{
+  color:#747e9c;
+}
+
+.winnerTime{
+  margin-left:auto;
+  color:#5f6885;
+  font-size:8px;
+}
+
+/* SECURITY */
+
+.info{
+  margin-top:20px;
+  display:flex;
+  gap:9px;
+  padding:13px;
+  border-radius:14px;
+  background:rgba(38,224,163,.04);
+  border:1px solid rgba(38,224,163,.1);
+  color:#75819d;
+  font-size:9px;
+  line-height:1.5;
+}
+
+/* MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  place-items:center;
+  padding:20px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(13px);
+}
+
+.modal.show{
+  display:grid;
+}
+
+.modalBox{
+  width:min(440px,100%);
+  text-align:center;
+  padding:34px 25px;
+  border-radius:29px;
+  background:
+    radial-gradient(circle at top,rgba(90,100,255,.18),transparent 50%),
+    #0c1020;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 35px 100px rgba(0,0,0,.6);
+  animation:modalIn .35s ease;
+}
+
+@keyframes modalIn{
+  from{
+    opacity:0;
+    transform:translateY(20px) scale(.92);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.trophy{
+  font-size:62px;
+  margin-bottom:8px;
+}
+
+.modalBox h2{
+  font-size:29px;
+}
+
+.modalBox p{
+  color:#7f89a7;
+  margin-top:8px;
+}
+
+.result{
+  margin:22px 0;
+  padding:19px;
+  border-radius:18px;
+  background:rgba(255,255,255,.055);
+}
+
+.result small{
+  color:#737d99;
+}
+
+.result strong{
+  display:block;
+  color:#5fe3ff;
+  font-size:21px;
+  margin-top:5px;
+}
+
+.close{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:14px;
+  background:#fff;
+  color:#080a12;
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* CONFETTI */
+
+.confetti{
+  position:fixed;
+  top:-20px;
+  width:7px;
+  height:13px;
+  z-index:200;
+  animation:drop 3s linear forwards;
+}
+
+@keyframes drop{
+  to{
+    transform:translateY(110vh) rotate(720deg);
+    opacity:0;
+  }
+}
+
+footer{
+  text-align:center;
+  color:#555f7c;
+  font-size:9px;
+  padding:35px 0;
+  line-height:1.7;
+}
+
+@media(max-width:800px){
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .hero{
+    padding-top:30px;
+  }
+
+  .hero h1{
+    letter-spacing:-2px;
+  }
+
+  .card{
+    padding:18px;
+  }
+
+}
+
+@media(max-width:430px){
+
+  .container{
+    width:94%;
+  }
+
+  .navRight .live{
+    display:none;
+  }
+
+  .stats{
+    gap:8px;
+  }
+
+  .stat{
+    padding:14px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<nav>
+  <div class="brand">
+    <div class="brandIcon">🎁</div>
+    <div>
+      LUCKORA
+      <small>LUCKY DRAW EXPERIENCE</small>
+    </div>
+  </div>
+
+  <div class="navRight">
+    <div class="live">
+      <i class="liveDot"></i>
+      LIVE DEMO
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+
+  <div class="eyebrow">
+    ✨ EVENT SPESIAL
+  </div>
+
+  <h1>LUCKY DRAW</h1>
+
+  <p>
+    Putar roda keberuntungan dan temukan hadiahmu.
+    Pengalaman undian digital dengan tampilan premium dan interaktif.
+  </p>
+
+</section>
+
+<div class="stats">
+
+  <div class="stat">
+    <strong id="participant">12,847</strong>
+    <span>PESERTA TERDAFTAR</span>
+  </div>
+
+  <div class="stat">
+    <strong>8</strong>
+    <span>JENIS HADIAH</span>
+  </div>
+
+  <div class="stat">
+    <strong>128</strong>
+    <span>PEMENANG</span>
+  </div>
+
+  <div class="stat">
+    <strong>LIVE</strong>
+    <span>STATUS EVENT</span>
+  </div>
+
+</div>
+
+<div class="grid">
+
+<!-- LEFT -->
+
+<div class="card">
+
+  <div class="title">
+    <h2>🎡 Lucky Wheel</h2>
+    <span>RANDOM DRAW</span>
+  </div>
+
+  <div class="wheelBox">
+
+    <div class="wheelContainer">
+
+      <div class="wheelGlow"></div>
+
+      <div class="pointer"></div>
+
+      <div class="wheel" id="wheel"></div>
+
+      <div class="labels">
+        <div>VOUCHER</div>
+        <div>HEADSET</div>
+        <div>BONUS</div>
+        <div>SPEAKER</div>
+        <div>MYSTERY</div>
+        <div>POINTS</div>
+        <div>GIFT</div>
+        <div>JACKPOT</div>
+      </div>
+
+    </div>
+
+    <button class="spin" id="spin">
+      🎯 PUTAR RODA SEKARANG
+    </button>
+
+  </div>
+
+  <div class="countdown">
+
+    <div class="cd">
+      <strong id="d">02</strong>
+      <span>HARI</span>
+    </div>
+
+    <div class="cd">
+      <strong id="h">14</strong>
+      <span>JAM</span>
+    </div>
+
+    <div class="cd">
+      <strong id="m">32</strong>
+      <span>MENIT</span>
+    </div>
+
+    <div class="cd">
+      <strong id="s">45</strong>
+      <span>DETIK</span>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- RIGHT -->
+
+<div>
+
+<div class="card">
+
+  <div class="title">
+    <h2>🏆 Hadiah Utama</h2>
+    <span>8 PRIZES</span>
+  </div>
+
+  <div class="prizes">
+
+    <div class="prize">
+      <div class="prizeIcon">🏆</div>
+      <div class="prizeInfo">
+        <b>JACKPOT</b>
+        <small>Hadiah spesial</small>
+      </div>
+      <div class="value">GRAND</div>
+    </div>
+
+    <div class="prize">
+      <div class="prizeIcon">🎧</div>
+      <div class="prizeInfo">
+        <b>Wireless Headset</b>
+        <small>Audio premium</small>
+      </div>
+      <div class="value">PRIZE</div>
+    </div>
+
+    <div class="prize">
+      <div class="prizeIcon">🔊</div>
+      <div class="prizeInfo">
+        <b>Mini Speaker</b>
+        <small>Portable audio</small>
+      </div>
+      <div class="value">PRIZE</div>
+    </div>
+
+    <div class="prize">
+      <div class="prizeIcon">🎁</div>
+      <div class="prizeInfo">
+        <b>Mystery Gift</b>
+        <small>Hadiah kejutan</small>
+      </div>
+      <div class="value">PRIZE</div>
+    </div>
+
+    <div class="prize">
+      <div class="prizeIcon">🎫</div>
+      <div class="prizeInfo">
+        <b>Voucher Digital</b>
+        <small>Voucher hadiah</small>
+      </div>
+      <div class="value">PRIZE</div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card winners">
+
+  <div class="title">
+    <h2>⚡ Pemenang Terbaru</h2>
+    <span>LIVE FEED</span>
+  </div>
+
+  <div id="winnerList">
+
+    <div class="winnerItem">
+      <div class="avatar">AR</div>
+      <div>
+        <b>Andi R.</b><br>
+        <span>Mystery Gift</span>
+      </div>
+      <div class="winnerTime">baru saja</div>
+    </div>
+
+    <div class="winnerItem">
+      <div class="avatar">DN</div>
+      <div>
+        <b>Dina N.</b><br>
+        <span>Voucher Digital</span>
+      </div>
+      <div class="winnerTime">1 mnt</div>
+    </div>
+
+    <div class="winnerItem">
+      <div class="avatar">RF</div>
+      <div>
+        <b>Rafi F.</b><br>
+        <span>Mini Speaker</span>
+      </div>
+      <div class="winnerTime">3 mnt</div>
+    </div>
+
+  </div>
+
+  <div class="info">
+    🔒 <div>
+      Sistem ini adalah simulasi antarmuka undian.
+      Tidak meminta password, PIN, OTP, atau pembayaran.
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+  LUCKORA © 2026<br>
+  SIMULASI / DEMO UNDian DIGITAL — BUKAN PROGRAM UNDIAN RESMI
+</footer>
+
+</div>
+
+
+<!-- RESULT MODAL -->
+
+<div class="modal" id="modal">
+
+  <div class="modalBox">
+
+    <div class="trophy">🏆</div>
+
+    <h2>SELAMAT!</h2>
+
+    <p>Hasil undian kamu adalah</p>
+
+    <div class="result">
+      <small>HADIAH TERPILIH</small>
+      <strong id="result">Mystery Gift</strong>
+    </div>
+
+    <button class="close" onclick="closeModal()">
+      SELESAI
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const wheel = document.getElementById("wheel");
+const spin = document.getElementById("spin");
+const modal = document.getElementById("modal");
+const result = document.getElementById("result");
+
+const prizes = [
+  "Voucher Digital",
+  "Wireless Headset",
+  "Bonus Points",
+  "Mini Speaker",
+  "Mystery Gift",
+  "Bonus Points",
+  "Mystery Gift",
+  "Jackpot"
+];
+
+let rotation = 0;
+let spinning = false;
+
+spin.addEventListener("click",()=>{
+
+  if(spinning)return;
+
+  spinning=true;
+
+  spin.disabled=true;
+  spin.textContent="⏳ MENGUNDI...";
+
+  const index =
+    Math.floor(Math.random()*prizes.length);
+
+  const segment=360/prizes.length;
+
+  /*
+    Beberapa putaran penuh agar animasi
+    terasa seperti roda undian sungguhan.
+  */
+
+  const extra=
+    5+Math.floor(Math.random()*3);
+
+  const target=
+    360-(index*segment+segment/2);
+
+  rotation +=
+    extra*360+target;
+
+  wheel.style.transform=
+    `rotate(${rotation}deg)`;
+
+  setTimeout(()=>{
+
+    result.textContent=prizes[index];
+
+    modal.classList.add("show");
+
+    confetti();
+
+    spin.disabled=false;
+    spin.textContent="🎯 PUTAR LAGI";
+
+    spinning=false;
+
+  },5000);
+
+});
+
+
+function closeModal(){
+
+  modal.classList.remove("show");
+
+}
+
+
+modal.addEventListener("click",(e)=>{
+
+  if(e.target===modal)
+    closeModal();
+
+});
+
+
+/* CONFETTI */
+
+function confetti(){
+
+  for(let i=0;i<100;i++){
+
+    const c=
+      document.createElement("div");
+
+    c.className="confetti";
+
+    c.style.left=
+      Math.random()*100+"vw";
+
+    c.style.background=
+      `hsl(${Math.random()*360},90%,65%)`;
+
+    c.style.animationDelay=
+      Math.random()*.8+"s";
+
+    c.style.transform=
+      `rotate(${Math.random()*360}deg)`;
+
+    document.body.appendChild(c);
+
+    setTimeout(()=>{
+      c.remove();
+    },3500);
+
+  }
+
+}
+
+
+/* COUNTDOWN */
+
+let seconds=
+  2*86400+
+  14*3600+
+  32*60+
+  45;
+
+function timer(){
+
+  let days=
+    Math.floor(seconds/86400);
+
+  let hours=
+    Math.floor((seconds%86400)/3600);
+
+  let minutes=
+    Math.floor((seconds%3600)/60);
+
+  let secs=
+    seconds%60;
+
+  document.getElementById("d").textContent=
+    String(days).padStart(2,"0");
+
+  document.getElementById("h").textContent=
+    String(hours).padStart(2,"0");
+
+  document.getElementById("m").textContent=
+    String(minutes).padStart(2,"0");
+
+  document.getElementById("s").textContent=
+    String(secs).padStart(2,"0");
+
+  if(seconds>0)
+    seconds--;
+
+}
+
+timer();
+setInterval(timer,1000);
+
+
+/* SIMULATED LIVE FEED */
+
+const names=[
+  "Fajar",
+  "Rizky",
+  "Dimas",
+  "Nadia",
+  "Aldi",
+  "Putri",
+  "Rian",
+  "Kevin"
+];
+
+const rewards=[
+  "Voucher Digital",
+  "Mystery Gift",
+  "Mini Speaker",
+  "Wireless Headset"
+];
+
+setInterval(()=>{
+
+  const name=
+    names[Math.floor(Math.random()*names.length)];
+
+  const reward=
+    rewards[Math.floor(Math.random()*rewards.length)];
+
+  const initials=
+    name.slice(0,2).toUpperCase();
+
+  const item=
+    document.createElement("div");
+
+  item.className="winnerItem";
+
+  item.innerHTML=`
+    <div class="avatar">${initials}</div>
+    <div>
+      <b>${name}</b><br>
+      <span>${reward}</span>
+    </div>
+    <div class="winnerTime">baru saja</div>
+  `;
+
+  const list=
+    document.getElementById("winnerList");
+
+  list.prepend(item);
+
+  if(list.children.length>4)
+    list.lastElementChild.remove();
+
+  /*
+    Angka peserta hanya animasi demo,
+    bukan data peserta sungguhan.
+  */
+
+  const participant=
+    document.getElementById("participant");
+
+  let current=
+    parseInt(participant.textContent.replace(",",""));
+
+  current++;
+
+  participant.textContent=
+    current.toLocaleString("en-US");
+
+},6500);
+
+</script>
+
+</body>
+</html>
